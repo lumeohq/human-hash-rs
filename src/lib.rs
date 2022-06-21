@@ -3,9 +3,6 @@
 //! Based on https://github.com/zacharyvoase/humanhash
 //! Should be compatible
 
-extern crate uuid;
-use uuid::Uuid;
-
 /// Class for custom humanhashers
 pub struct HumanHasher {
     words: Wordlist,
@@ -65,8 +62,8 @@ impl HumanHasher {
 
     /// Create a human readable digest for a UUID. Makes the collision space worse,
     /// reducing it to 1:(2^(8*`words_out`)-1).
-    pub fn humanize(&self, uuid: &Uuid, words_out: usize) -> String {
-        compress(uuid.as_bytes(), words_out)
+    pub fn humanize(&self, bytes: &[u8; 16], words_out: usize) -> String {
+        compress(bytes, words_out)
             .iter()
             .map(|&x| self.words[x as usize].to_string())
             .collect::<Vec<String>>()
@@ -87,13 +84,13 @@ fn compress(bytes: &[u8], target: usize) -> Vec<u8> {
 
 /// Create a human readable digest for a UUID. Makes the collision space worse,
 /// reducing it to 1:(2^(8*`words_out`)-1).
-pub fn humanize(uuid: &Uuid, words_out: usize) -> String {
-    DEFAULT_HUMANIZER.humanize(uuid, words_out)
+pub fn humanize(bytes: &[u8; 16], words_out: usize) -> String {
+    DEFAULT_HUMANIZER.humanize(bytes, words_out)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::uuid::Uuid;
+    use uuid::Uuid;
     use super::DEFAULT_WORDLIST;
     use super::{humanize, HumanHasher};
 
@@ -103,13 +100,13 @@ mod tests {
     fn it_works() {
         let tuid = Uuid::parse_str(TEST_UUID).unwrap();
 
-        assert_eq!(humanize(&tuid, 4), "august-yankee-lima-coffee");
+        assert_eq!(humanize(tuid.as_bytes(), 4), "august-yankee-lima-coffee");
 
-        assert_eq!("pip", humanize(&tuid, 1));
-        assert_eq!("washington-hot", humanize(&tuid, 2));
-        assert_eq!("august-yankee-lima-coffee", humanize(&tuid, 4));
+        assert_eq!("pip", humanize(tuid.as_bytes(), 1));
+        assert_eq!("washington-hot", humanize(tuid.as_bytes(), 2));
+        assert_eq!("august-yankee-lima-coffee", humanize(tuid.as_bytes(), 4));
         assert_eq!("princess-sad-victor-bakerloo-whiskey-mike-saturn-uniform",
-                   humanize(&tuid, 8));
+                   humanize(tuid.as_bytes(), 8));
 
     }
 
@@ -119,6 +116,6 @@ mod tests {
 
         let hzr = HumanHasher::new(&DEFAULT_WORDLIST);
 
-        assert_eq!(humanize(&tuid, 4), hzr.humanize(&tuid, 4));
+        assert_eq!(humanize(tuid.as_bytes(), 4), hzr.humanize(tuid.as_bytes(), 4));
     }
 }

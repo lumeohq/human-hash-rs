@@ -6,6 +6,7 @@ license = "MIT"
 description = "Generate human readable hash digests"
 repository = "https://github.com/jamesmunns/human-hash-rs"
 documentation = "https://docs.rs/crate/human-hash/"
+edition = "2021"
 
-[dependencies]
+[dev-dependencies]
 uuid = { version = "0.8", features = ["v4"] }
